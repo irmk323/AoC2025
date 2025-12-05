@@ -60,7 +60,7 @@ public class Day3 {
                     secondIndex = i;
                 }
             }
-            System.out.println("maxIndex" + maxIndex + " max" + max + " secMax" + secMax + " sec" + secondIndex);
+//            System.out.println("maxIndex" + maxIndex + " max" + max + " secMax" + secMax + " sec" + secondIndex);
             int jointed =0;
             // 987654321111111
             if(maxIndex < secondIndex){
@@ -68,15 +68,14 @@ public class Day3 {
             // 811111111111119
             }else if(secondIndex < maxIndex &&  maxIndex == chars.length -1 ){
                 jointed = secMax * 10 + max;
-//                234234234234278
+
 //                818181911112111
             }else if( secondIndex < maxIndex && maxIndex < chars.length -1 ){
 
                 int largetsNumInRight = findSecondLargestAfterMaxInRight(chars, maxIndex);
-                System.out.println("largetsNumInRight" + largetsNumInRight);
+
                 jointed =  max * 10 + largetsNumInRight;
             }
-            System.out.println("jointed" + jointed);
             numbers.add((long) jointed);
         }
         return numbers.stream().mapToLong(Long::longValue).sum();
@@ -97,9 +96,30 @@ public class Day3 {
     private static long solvePart2(List<String> lines) {
         List<Long> numbers = new ArrayList<>();
         for (String line : lines) {
+            int remove = line.length() - 12; // the number we can stil remove
+            StringBuilder result = new StringBuilder();
 
+            for (int i = 0; i < line.length(); i++) {
+                char d = line.charAt(i);
+
+                while (remove > 0
+                        && result.length() > 0
+                        && result.charAt(result.length() - 1) < d) {
+
+                    result.deleteCharAt(result.length() - 1);
+                    remove--; // yes we can remove this weak num!
+                }
+
+                result.append(d);
+            }
+
+            if (result.length() > 12) {
+                // or while (result.length() > 12) result.deleteCharAt(result.length() - 1);
+                result.setLength(12);
+            }
+            numbers.add(Long.parseLong(result.toString()));
         }
-        return 0L;
+        return numbers.stream().mapToLong(Long::longValue).sum();
     }
 
 
