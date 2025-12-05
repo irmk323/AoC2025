@@ -10,8 +10,8 @@ public class Day1 {
         String filePath = Paths.get("Day2", "day2.txt").toString();
         List<String> lines = readInput(filePath);
 
-        System.out.println("Part 1: " + solvePart1(lines));
-//        System.out.println("Part 2: " + solvePart2(lines));
+//        System.out.println("Part 1: " + solvePart1(lines));
+        System.out.println("Part 2: " + solvePart2(lines));
     }
 
     private static List<String> readInput(String filePath) {
@@ -67,46 +67,45 @@ public class Day1 {
         return true;
     }
 
-    private static int solvePart2(List<String> lines) {
-        // TODO: Implement Part 2 solution
-        int position = 50;
-        int counter = 0;
+    private static long solvePart2(List<String> lines) {
+        List<Long> numbers = new ArrayList<>();
         for (String line : lines) {
-            if (line.startsWith("L") ){
+            String[] parts = line.split("-");
+            long start = Long.parseLong(parts[0]);
+            long end = Long.parseLong(parts[1]);
 
-                int value = Integer.parseInt(line.replaceAll("\\D", ""));
-                int rounds = value / 100;
+            for (long i = start; i <= end; i++) {
+                String strI = Long.toString(i);
+                int n = strI.length();
 
-                int tempPosition =  position - (value%100 ) ;
-
-                if(tempPosition < 0){
-                    position = 100 - Math.abs(tempPosition) ;
-                    counter++;
-
-                }else{
-                    position = tempPosition;
+                int[] pi = buildPrefixFunctions(strI);
+                int L = pi[n-1];
+                int period = n - L;
+                if(L > 0 && n % period == 0){
+                    System.out.println(strI);
+                    numbers.add(Long.parseLong(strI));
                 }
-                counter+=rounds;
-
-
-            }else if (line.startsWith("R") ){
-                int value = Integer.parseInt(line.replaceAll("\\D", ""));
-                int rounds = value / 100;
-                int tempPosition = position + (value % 100);
-                if(tempPosition  == 100){
-                    position =  0;
-                    counter++;
-                }else if(tempPosition > 100){
-                    position =  tempPosition -100;
-                    counter++;
-                }else{
-                    position = tempPosition;
-                }
-                counter+=rounds;
-
             }
-
         }
-        return counter;
+        return numbers.stream().reduce(0L, Long::sum);
     }
+    private static int[] buildPrefixFunctions(String strI) {
+        int n = strI.length();
+        int[] pi = new int[n];
+        // str 1 1 2 3 1 1 2 3
+        // pi  0 1 0 0 1 0 0 0
+        for (int i = 1; i < n; i++) {
+            int j = pi[i-1];
+
+            while(j> 0 && strI.charAt(j) != strI.charAt(i)) {
+               j=pi[j-1];
+            }
+            if(strI.charAt(i) == strI.charAt(j)) {
+                j++;
+            }
+            pi[i] = j;
+        }
+        return pi;
+    }
+
 }
