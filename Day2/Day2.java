@@ -5,9 +5,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Day1 {
+public class Day2 {
     public static void main(String[] args) {
-        String filePath = Paths.get("Day2", "day2.txt").toString();
+        String filePath = Paths.get("Day2", "day3.txt").toString();
         List<String> lines = readInput(filePath);
 
 //        System.out.println("Part 1: " + solvePart1(lines));
