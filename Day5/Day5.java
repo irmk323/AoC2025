@@ -7,112 +7,112 @@ import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Comparator;
 
-public class Day4 {
+public class Day5 {
     public static void main(String[] args) {
         String filePath = Paths.get("Day5", "day5.txt").toString();
-        char[][] grid = readInput(filePath);
 
-        System.out.println("Part 1: " + solvePart1(grid));
-        System.out.println("Part 2: " + solvePart2(grid));
+        List<FreshIdRange> ranges = new ArrayList<>();
+        List<Long> ids = new ArrayList<>();
+
+        readInput(filePath, ranges, ids);
+
+        System.out.println("Ranges:");
+        for (FreshIdRange range : ranges) {
+            System.out.println(range);
+        }
+
+        System.out.println("\nIDs:");
+        for (Long id : ids) {
+            System.out.println(id);
+        }
+
+        System.out.println("\nPart 1: " + solvePart1(ranges, ids));
+        System.out.println("Part 2: " + solvePart2(ranges, ids));
     }
 
-    private static char[][] readInput(String filePath) {
-        List<String> lines = new ArrayList<>();
-
+    private static void readInput(String filePath, List<FreshIdRange> freshIdRange, List<Long> ids) {
         try (BufferedReader br = new BufferedReader(new FileReader(filePath))) {
             String line;
+            boolean readingRanges = true;
+
             while ((line = br.readLine()) != null) {
-                lines.add(line);
+                if (line.trim().isEmpty()) {
+                    readingRanges = false;
+                    continue;
+                }
+
+                if (readingRanges) {
+                    String strLine = line.trim();
+                    String[] split = strLine.split("-");
+                    long rangeStart = Long.valueOf(split[0]);
+                    long rangeEnd = Long.valueOf(split[1]);
+                    freshIdRange.add(new FreshIdRange(rangeStart, rangeEnd));
+                } else {
+                    ids.add(Long.parseLong(line.trim()));
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
             e.printStackTrace();
         }
-
-        // Convert to 2D char array
-        int rows = lines.size();
-        int cols = rows > 0 ? lines.get(0).length() : 0;
-        char[][] grid = new char[rows][cols];
-
-        for (int i = 0; i < rows; i++) {
-            grid[i] = lines.get(i).toCharArray();
-        }
-
-        return grid;
     }
+    record FreshIdRange (long start, long end) {}
+    private static int solvePart1(List<FreshIdRange> freshIdRange, List<Long> ids) {
 
-    private static int solvePart1(char[][] grid) {
-        int count= 0;
-        char[][] copy = new char[grid.length][];
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                if (grid[i][j] == '@') {
-                   if (checkEightCorners(grid, i, j, copy)){
-                       count++;
-                   }
+        List<FreshIdRange> merged = createMerge(freshIdRange);
+        int ansCount = 0;
+        for(Long id :ids){
+            for(FreshIdRange range : merged){
+                if( range.start <= id &&  id <=range.end ){
+                    ansCount++;
                 }
             }
         }
-        return count;
+        return ansCount;
     }
-    // row == up(-1)/donn(+1)
-    // column == right(+1)/left(-1)
-    // [row][col]
-    private static boolean checkEightCorners(char[][] grid, int i, int j , char[][] copy) {
-        int atMarkCount = 0;
+    private static List<FreshIdRange> createMerge(List<FreshIdRange> freshIdRange) {
+        // sort freshIdRange by start
+        freshIdRange.sort(Comparator.comparingLong(FreshIdRange::start)
+                .thenComparingLong(FreshIdRange::end));
+        List<FreshIdRange> merged = new ArrayList<>();
 
-        int[][] directions = {
-                {-1, -1}, {-1, 0}, {-1, 1},
-                { 0, -1},          { 0, 1},
-                { 1, -1}, { 1, 0}, { 1, 1}
-        };
-        for (int[] direction : directions) {
-            int x = i + direction[0];
-            int y = j + direction[1];
-            if( 0 <= x && x < grid.length && 0 <= y && y < grid[0].length && grid[x][y] == '@') {
-                atMarkCount++;
+        FreshIdRange cur = freshIdRange.get(0);
+
+        // 2つ目以降の区間を順に見ていく
+        for (int i = 1; i < freshIdRange.size(); i++) {
+            FreshIdRange next = freshIdRange.get(i);
+
+            // オーバーラップ or 接続しているならマージ
+            if (next.start() <= cur.end()) {
+                cur = new FreshIdRange(
+                        cur.start(),
+                        Math.max(cur.end(), next.end())
+                );
+            } else {
+                // 重ならない → cur を確定して merged に入れる
+                merged.add(cur);
+                cur = next; // 新しい current
             }
         }
 
-        return atMarkCount < 4? true : false;
-
+        // 最後の1個を追加
+        merged.add(cur);
+        return merged;
     }
-    // 1. take count, and do remove then return
-    // 2. if count > 0, do again with copy
-    // 3
 
-    record GridResult(char[][] grid, long sum) {}
-
-    private static long solvePart2(char[][] grid) {
+    private static long solvePart2(List<FreshIdRange> freshIdRange, List<Long> ids) {
+        List<FreshIdRange> merged = createMerge(freshIdRange);
         long sum = 0;
-        GridResult ans = createNewGrid(grid, sum);
-        return ans.sum();
+        for (FreshIdRange range : merged) {
+//            System.out.println(range);
+            sum += range.end-range.start +1;
+        }
+        return  sum;
     }
 
-    private static GridResult createNewGrid(char[][] grid, long sum) {
-        int count= 0;
-        char[][] copy = new char[grid.length][];
-        for (int i = 0; i < grid.length; i++) {
-            copy[i] = grid[i].clone();
-        }
-        for (int i = 0; i < grid.length; i++) {
-            for (int j = 0; j < grid[0].length; j++) {
-                if (grid[i][j] == '@') {
-                    if (checkEightCorners(grid, i, j, copy)){
-                        copy[i][j] = 'x';
-                        count++;
-                    }
-                }
-            }
-        }
-        sum += count;
-        if(count == 0){
-            return new GridResult(copy, sum);
-        }else{
-            return createNewGrid(copy, sum);
-        }
-    }
+
 
 
 }
