@@ -106,7 +106,6 @@ public class Day5 {
         List<FreshIdRange> merged = createMerge(freshIdRange);
         long sum = 0;
         for (FreshIdRange range : merged) {
-//            System.out.println(range);
             sum += range.end-range.start +1;
         }
         return  sum;
