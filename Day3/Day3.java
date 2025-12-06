@@ -9,7 +9,7 @@ import java.util.Map;
 
 public class Day3 {
     public static void main(String[] args) {
-        String filePath = Paths.get("Day3", "day3.txt").toString();
+        String filePath = Paths.get("Day3", "day4.txt").toString();
         List<String> lines = readInput(filePath);
 
         System.out.println("Part 1: " + solvePart1(lines));

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class Day2 {
     public static void main(String[] args) {
-        String filePath = Paths.get("Day2", "day3.txt").toString();
+        String filePath = Paths.get("Day2", "day4.txt").toString();
         List<String> lines = readInput(filePath);
 
 //        System.out.println("Part 1: " + solvePart1(lines));
