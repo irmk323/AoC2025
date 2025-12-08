@@ -15,8 +15,8 @@ public class Day6 {
         List<String> strings = new ArrayList<>();
         readInput(filePath,strings);
 
-        System.out.println("\nPart 1: " + solvePart1(strings));
-//        System.out.println("Part 2: " + solvePart2(strings));
+        System.out.println("Part 1: " + solvePart1(strings));
+        System.out.println("Part 2: " + solvePart2(strings));
     }
 
     private static void readInput(String filePath, List<String> strings) {
@@ -42,7 +42,6 @@ public class Day6 {
                 if(element.isEmpty()){
                     continue;
                 }
-                System.out.println(oneLine);
                 oneLine.add(element);
             }
             parsedStrings.add(oneLine);
@@ -65,7 +64,7 @@ public class Day6 {
         for(int i =0; i< strings.size()-1; i++){
             added += Long.valueOf(strings.get(i).get(idx));
         }
-        System.out.println(added);
+
         return added;
     }
     private static long multiplied(List<List<String>> strings, int idx) {
@@ -73,19 +72,70 @@ public class Day6 {
         for(int i =0; i< strings.size()-1; i++){
             multiplied = multiplied * Long.valueOf(strings.get(i).get(idx));
         }
-        System.out.println(multiplied);
         return multiplied;
     }
 
 
-
     private static long solvePart2(List<String> strings) {
-    return 0L;
+        //get last line as operator
+        int charLength = strings.get(0).length();
+        String[] ops = strings.get(strings.size() -1).trim().split("\\s+");
+
+        // set all to chars
+        char[][] chr = new char[strings.size()-1][charLength];
+        for(int i =0; i< strings.size()-1; i++) {
+            char[] chars = strings.get(i).toCharArray();
+            chr[i] = chars;
+        }
+        ArrayList<Long> columnResults = new ArrayList<>();
+
+        boolean newProblem = true;
+        long colTotal = 0;
+
+        int opsIndex = 0;
+        for(int i =0; i< charLength; i++) {
+            boolean allSpaceColumn = true;
+
+            if(newProblem){
+                colTotal = 0;
+                newProblem = false;
+                if(ops[opsIndex].equals("*")){
+                    colTotal = 1;
+                }
+            }
+            int verticalNum = 0;
+            // pick up char from every row
+            for(int j =0; j<  chr.length; j++) {
+//                [[1, 2, 3,  , 3, 2, 8,  ,  , 5, 1,  , 6, 4],
+//                [ , 4, 5,  , 6, 4,  ,  , 3, 8, 7,  , 2, 3],
+//                [ ,  , 6,  , 9, 8,  ,  , 2, 1, 5,  , 3, 1, 4]]
+
+                char cell = chr[j][i];
+                if (cell == ' ') {
+                } else {
+                    allSpaceColumn = false;
+                    verticalNum = verticalNum * 10 + Character.getNumericValue(cell);
+                }
+            }
+
+                if (allSpaceColumn) {
+                    columnResults.add(colTotal);
+                    newProblem = true;
+                    opsIndex++;
+                    continue;
+                }
+//            System.out.println("ops[opsIndex]" + ops[opsIndex]);
+                if (ops[opsIndex].equals("+")) {
+                    colTotal += verticalNum;
+                } else {
+                    colTotal *= verticalNum;
+                }
+        }
+  
+        columnResults.add(colTotal);
+
+//        System.out.println(Arrays.deepToString(chr));
+    return columnResults.stream().reduce(0L, Long::sum);
+
     }
-
-
-
-
-
-
 }
