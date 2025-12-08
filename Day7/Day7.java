@@ -62,16 +62,57 @@ public class Day7 {
 //        // print Grid
 //        for (int i = 0; i < grid.length; i++) {
 //            for (int j = 0; j < grid[i].length; j++) {
-//                System.out.print(grid[i][j]);
-//            }
-//            System.out.println();
-//        }
-        return count;
+    //                System.out.print(grid[i][j]);
+    //            }
+    //            System.out.println();
+    //        }
+            return count;
     }
 
 
     private static long solvePart2(char[][] grid) {
-        // TODO: Implement Part 2 logic
-        return 0;
+        int H = grid.length;
+        int W = grid[0].length;
+        long[][] dp = new long[H][W];
+        int startCol = 0;
+        for (int i = 0; i < W; i++) {
+            if (grid[0][i] == 'S') {
+                startCol = i;
+            }
+        }
+        dp[0][startCol] = 1;
+        for (int i = 0; i < H - 1; i++) {
+            for (int j = 0; j < W; j++) {
+                long cnt = dp[i][j];
+                if (cnt == 0) continue;
+                char cell = grid[i][j];
+
+                if (cell == '^') {
+                    if (j - 1 >= 0) {
+                        dp[i + 1][j - 1] += cnt;
+                    }
+                    if (j + 1 < W) {
+                        dp[i + 1][j + 1] += cnt;
+                    }
+                } else {
+                    dp[i + 1][j] += cnt;
+                }
+            }
+        }
+        // print Grid
+//        for (int i = 0; i < dp.length; i++) {
+//            for (int j = 0; j < dp[i].length; j++) {
+//                        System.out.print(dp[i][j]);
+//                System.out.print(' ');
+//                    }
+//                    System.out.println();
+//                }
+        // 一番下の行に残っているタイムライン本数の合計が答え
+        long total = 0;
+        for (int j = 0; j < W; j++) {
+            total += dp[H - 1][j];
+        }
+        return total;
     }
+    
 }
